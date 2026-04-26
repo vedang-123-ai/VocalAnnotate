@@ -1,4 +1,4 @@
-# VocalAnnotate 🎙
+# VocalAnnotate 
 
 A voice-first annotation companion for students reading physical books.
 
@@ -44,11 +44,10 @@ vocalannotate/
 ├── db/database.py   # SQLite models + CRUD
 ├── voice/
 │   ├── recorder.py  # Mic capture + speech-to-text
-│   └── parser.py    # Page number extraction
+│   └── parser.py    # Page number and annotation extraction
 └── requirements.txt
 ```
 
 ## Data Storage
 
 All notes saved to `vocalannotate.db` (SQLite) in the project folder.
-No cloud. No accounts. Local-first.
