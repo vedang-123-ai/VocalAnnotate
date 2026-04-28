@@ -38,17 +38,34 @@ def words_to_number(text: str) -> int | None:
     return total + current if (total + current) > 0 else None
 
 
+def _extract_theme(note: str):
+    """
+    If note starts with 'theme <name>, <rest>', return (name, rest).
+    Otherwise return (None, note) unchanged.
+    Requires a comma after the theme name so 'theme' mid-note isn't accidentally parsed.
+    """
+    m = re.match(r'^theme[:\s]+([^,]+),\s*(.*)', note.strip(), re.IGNORECASE)
+    if m:
+        theme_name = m.group(1).strip()
+        remaining = m.group(2).strip()
+        if theme_name and remaining:
+            return theme_name, remaining
+    return None, note
+
+
 def parse_annotation(transcript: str) -> dict | None:
     """
-    Parse a voice transcript into {page, note}.
-    
+    Parse a voice transcript into {page, note, theme}.
+
     Supports:
       - "Page 42, symbolism of the green light"
+      - "Page 47, theme patriarchy, symbolism of the burqa"
       - "page 103 quote: old sport"
       - "pg 55 irony"
       - "Page seventy six character shift"
       - "Page 12 comma metaphor of fire"
-    
+
+    theme is None when not specified (Unclassified).
     Returns None if no page number found.
     """
     text = transcript.strip()
@@ -68,7 +85,8 @@ def parse_annotation(transcript: str) -> dict | None:
         page = int(digit_match.group(1))
         note = (digit_match.group(2) or "").strip().lstrip(",").strip()
         if note:
-            return {"page": page, "note": note}
+            theme, note = _extract_theme(note)
+            return {"page": page, "note": note, "theme": theme}
         return None
 
     # Pattern 2: "page <word-number> <note>"
@@ -85,7 +103,8 @@ def parse_annotation(transcript: str) -> dict | None:
         page = words_to_number(num_str.lower())
         note = (word_num_match.group(2) or "").strip().lstrip(",").strip()
         if page and note:
-            return {"page": page, "note": note}
+            theme, note = _extract_theme(note)
+            return {"page": page, "note": note, "theme": theme}
 
     return None
 

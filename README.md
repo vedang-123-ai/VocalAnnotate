@@ -24,11 +24,15 @@ python main.py
 
 | You say | Parsed as |
 |---|---|
-| `Page 42, symbolism of hope` | Page 42 |
+| `Page 42, symbolism of hope` | Page 42, Unclassified |
+| `Page 47, theme patriarchy, symbolism of the burqa` | Page 47, theme: Patriarchy |
 | `page 103 quote colon old sport` | Page 103, note: "quote: old sport" |
 | `Pg 22 foreshadowing` | Page 22 |
 | `Page seventy six character shift` | Page 76 |
 | `Page 12 comma motif of darkness` | Page 12 |
+| `Page 47 comma theme patriarchy comma note text` | Page 47, theme: Patriarchy (spoken punctuation) |
+
+**Theme rules:** The theme name must match an existing theme for the book (case-insensitive). If it doesn't match, the annotation is saved as Unclassified with a warning. Create themes first using the themes bar above the annotation list.
 
 ## Voice Requirements
 
