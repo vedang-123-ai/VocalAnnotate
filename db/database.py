@@ -15,6 +15,7 @@ class Book(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    cover_path = Column(String(500), nullable=True)
     annotations = relationship("Annotation", back_populates="book", cascade="all, delete-orphan")
     themes = relationship("Theme", back_populates="book", cascade="all, delete-orphan")
 
@@ -49,7 +50,7 @@ engine = create_engine(f"sqlite:///{DB_PATH}", echo=False)
 
 
 def _migrate_existing_db():
-    """Add theme_id column to existing annotations table if it was created before themes existed."""
+    """Add columns to existing tables that were created before newer features existed."""
     with engine.connect() as conn:
         result = conn.exec_driver_sql("PRAGMA table_info(annotations)")
         cols = [row[1] for row in result]
@@ -57,6 +58,12 @@ def _migrate_existing_db():
             conn.exec_driver_sql(
                 "ALTER TABLE annotations ADD COLUMN theme_id INTEGER REFERENCES themes(id)"
             )
+            conn.commit()
+
+        result = conn.exec_driver_sql("PRAGMA table_info(books)")
+        cols = [row[1] for row in result]
+        if cols and "cover_path" not in cols:
+            conn.exec_driver_sql("ALTER TABLE books ADD COLUMN cover_path VARCHAR(500)")
             conn.commit()
 
 
@@ -84,7 +91,10 @@ def add_book(title: str) -> Book:
 def get_all_books():
     session = get_session()
     books = session.query(Book).order_by(Book.created_at).all()
-    result = [{"id": b.id, "title": b.title} for b in books]
+    result = [
+        {"id": b.id, "title": b.title, "cover_path": b.cover_path}
+        for b in books
+    ]
     session.close()
     return result
 
@@ -94,6 +104,15 @@ def delete_book(book_id: int):
     book = session.query(Book).filter_by(id=book_id).first()
     if book:
         session.delete(book)
+        session.commit()
+    session.close()
+
+
+def update_book_cover(book_id: int, cover_path):
+    session = get_session()
+    book = session.query(Book).filter_by(id=book_id).first()
+    if book:
+        book.cover_path = cover_path
         session.commit()
     session.close()
 
